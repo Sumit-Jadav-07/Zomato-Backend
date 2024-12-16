@@ -50,11 +50,21 @@ public class CustomerService {
     return ResponseEntity.ok("Invalid Email");
   }
 
-  public CustomerEntity authenticateCustomer(String email, String password){
+  // Authenticating customer by email and password
+  // public CustomerEntity authenticateCustomer(String email, String password){
+  //   CustomerEntity customer = customerRepo.findByEmail(email);
+  //   if(customer != null && encoder.matches(password, customer.getPassword())){
+  //     return customer;
+  //   }
+  //   return null;
+  // }
+
+  // Checking if email exist or not
+  public CustomerEntity authenticateCustomer(String email){
     CustomerEntity customer = customerRepo.findByEmail(email);
-    if(customer != null && encoder.matches(password, customer.getPassword())){
+    if(customer != null){
       return customer;
-    }
+    } 
     return null;
   }
 

@@ -65,7 +65,7 @@ public class SessionController {
 
   @PostMapping("/customer")
   public String addCustomer(@RequestBody CustomerEntity entity) {
-    entity.setPassword(encoder.encode(entity.getPassword()));
+    // entity.setPassword(encoder.encode(entity.getPassword()));
     customerRepo.save(entity);
     return "Success";
   }
@@ -84,8 +84,7 @@ public class SessionController {
 
     switch (loginRequest.getRole().toLowerCase()) {
       case "customer":
-        CustomerEntity customer = customerService.authenticateCustomer(loginRequest.getEmail(),
-            loginRequest.getPassword());
+        CustomerEntity customer = customerService.authenticateCustomer(loginRequest.getEmail());
         if (customer != null) {
           // Generate a random token (not JWT)
           // String token = service.generateToken();// Use a simple random UUID as the token

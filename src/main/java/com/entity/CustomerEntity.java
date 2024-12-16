@@ -9,6 +9,7 @@ import jakarta.persistence.Entity;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.experimental.FieldDefaults;
+import jakarta.persistence.Column;
 
 @Entity
 @Data
@@ -19,7 +20,9 @@ public class CustomerEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	Integer customerId;
-	String fullName;
+	
+	@Column(name = "fullname")
+	String fullname;
 	String email;
 	String password;
 	String gender;

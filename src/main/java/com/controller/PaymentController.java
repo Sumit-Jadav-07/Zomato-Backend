@@ -36,16 +36,17 @@ public class PaymentController {
 
     @PostMapping("/checkout")
     public ResponseEntity<String> checkout(@RequestBody CheckoutRequest checkoutRequest) {
-
+        OrderEntity order = createOrder(checkoutRequest, null);
+        if (order == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Your cart is empty");
+        }
         if ("COD".equalsIgnoreCase(checkoutRequest.getPaymentType())) {
-            OrderEntity order = createOrder(checkoutRequest, null);
             orderRepo.save(order);
             return ResponseEntity.ok("Order created successfully with Cash on delivery");
         } else if ("CreditCard".equalsIgnoreCase(checkoutRequest.getPaymentType())) {
-            PaymentResponse paymentResponse = processCreditCardPayment(checkoutRequest);
 
+            PaymentResponse paymentResponse = processCreditCardPayment(checkoutRequest);
             if (paymentResponse.isSuccess()) {
-                OrderEntity order = createOrder(checkoutRequest, paymentResponse);
                 orderRepo.save(order);
                 return ResponseEntity.ok("Payment successful and Order created successfully");
             } else {
@@ -62,13 +63,24 @@ public class PaymentController {
     }
 
     private OrderEntity createOrder(CheckoutRequest checkoutRequest, PaymentResponse paymentResponse) {
+        // Fetch and validate customer
         Optional<CustomerEntity> customerOp = customerRepo.findById(checkoutRequest.getCustomerId());
+        if (customerOp.isEmpty()) {
+            System.out.println("Customer not found");
+            return null;
+        }
         CustomerEntity customer = customerOp.get();
-        Optional<CartEntity> cartOp = cartRepo.findById(checkoutRequest.getCartId());
-        CartEntity cart = cartOp.get();
-        
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a dd-MM-yyyy");
 
+        // Fetch and validate cart
+        Optional<CartEntity> cartOp = cartRepo.findById(checkoutRequest.getCartId());
+        if (cartOp.isEmpty()) {
+            System.out.println("Cart not found or empty");
+            return null;
+        }
+        CartEntity cart = cartOp.get();
+
+        // Proceed with order creation
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a dd-MM-yyyy");
         OrderEntity order = new OrderEntity();
         order.setCustomer(customer);
         order.setCart(cart);
@@ -83,6 +95,7 @@ public class PaymentController {
         } else {
             order.setPaymentType("COD");
         }
+
         return order;
     }
 
